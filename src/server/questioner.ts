@@ -1,0 +1,116 @@
+export interface Question {
+    command: string;
+    options?: string[];
+}
+
+export type Response = {
+    value: string | number;
+    question: Question;
+};
+
+export type OnQuestionnaireFinish = (
+    responses: Response[],
+) => Promise<void> | void;
+
+export type OnQuestionnaireInit = () => Promise<void> | void;
+
+export type OnQuestionnaireOptionException = (
+    currentQuestion: Question,
+    response: string,
+) => Promise<void> | void;
+
+export class Questioner {
+    private nextQuestionIndex = 0;
+    private responses: Response[] = [];
+
+    constructor(
+        private questions: Question[],
+        private onFinish: OnQuestionnaireFinish,
+        private onInit: OnQuestionnaireInit,
+        private onOptionException: OnQuestionnaireOptionException,
+    ) {}
+
+    private getCurrentQuestion() {
+        return this.questions[this.nextQuestionIndex - 1];
+    }
+
+    private getNextQuestion() {
+        return this.questions[this.nextQuestionIndex];
+    }
+
+    private isInitialQuestion() {
+        return this.nextQuestionIndex === 0;
+    }
+
+    private isLastResponse() {
+        return this.nextQuestionIndex >= this.questions.length;
+    }
+
+    private buildInTextQuestion(question: Question): string {
+        if (!question.options) return question.command;
+
+        let content = question.command + "\n";
+
+        for (let i = 0; i < question.options.length; i++) {
+            const option = question.options[i];
+            content += `[ ${i + 1} ] ${option}\n`;
+        }
+
+        return content;
+    }
+
+    private getRelatedOption(question: Question, response: string) {
+        if (!question.options) return response;
+
+        response = response.trim();
+
+        const matchIndex = (index: number) => index === Number(response) - 1;
+        const matchValue = (option: string) =>
+            option.toLowerCase() === response.toLowerCase();
+
+        return question.options.find(
+            (option, index) => matchIndex(index) || matchValue(option),
+        );
+    }
+
+    async nextQuestion() {
+        if (this.isInitialQuestion()) {
+            await this.onInit();
+        }
+
+        const question = this.getNextQuestion();
+        if (!question) return;
+
+        this.nextQuestionIndex++;
+
+        return { raw: question, inText: this.buildInTextQuestion(question) };
+    }
+
+    async handleWaitingResponse(response: string) {
+        const currentQuestion = this.getCurrentQuestion();
+        if (!currentQuestion) return;
+
+        const option = this.getRelatedOption(currentQuestion, response);
+
+        if (!option) {
+            this.nextQuestionIndex--;
+
+            await this.onOptionException(currentQuestion, response);
+
+            throw new InvalidOptionException(
+                "The option sent is invalid: does not match the index or the value.",
+            );
+        }
+
+        this.responses.push({
+            question: currentQuestion,
+            value: option,
+        });
+
+        if (this.isLastResponse()) {
+            await this.onFinish(this.responses);
+        }
+    }
+}
+
+class InvalidOptionException extends Error {}
