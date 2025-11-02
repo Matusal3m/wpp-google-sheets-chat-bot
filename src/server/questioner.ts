@@ -25,9 +25,9 @@ export class Questioner {
 
     constructor(
         private questions: Question[],
-        private onFinish: OnQuestionnaireFinish,
-        private onInit: OnQuestionnaireInit,
-        private onOptionException: OnQuestionnaireOptionException,
+        public onFinish?: OnQuestionnaireFinish,
+        public onInit?: OnQuestionnaireInit,
+        public onOptionException?: OnQuestionnaireOptionException,
     ) {}
 
     private getCurrentQuestion() {
@@ -42,14 +42,10 @@ export class Questioner {
         return this.nextQuestionIndex === 0;
     }
 
-    private isLastResponse() {
-        return this.nextQuestionIndex >= this.questions.length;
-    }
-
     private buildInTextQuestion(question: Question): string {
         if (!question.options) return question.command;
 
-        let content = question.command + "\n";
+        let content = question.command + "\n\n";
 
         for (let i = 0; i < question.options.length; i++) {
             const option = question.options[i];
@@ -75,11 +71,16 @@ export class Questioner {
 
     async nextQuestion() {
         if (this.isInitialQuestion()) {
-            await this.onInit();
+            await this?.onInit?.();
         }
 
         const question = this.getNextQuestion();
-        if (!question) return;
+
+        if (!question) {
+            throw new NoMoreQuestionsException(
+                "The is no more questions available on the quesitonnaire.",
+            );
+        }
 
         this.nextQuestionIndex++;
 
@@ -88,6 +89,7 @@ export class Questioner {
 
     async handleWaitingResponse(response: string) {
         const currentQuestion = this.getCurrentQuestion();
+
         if (!currentQuestion) return;
 
         const option = this.getRelatedOption(currentQuestion, response);
@@ -95,7 +97,7 @@ export class Questioner {
         if (!option) {
             this.nextQuestionIndex--;
 
-            await this.onOptionException(currentQuestion, response);
+            await this?.onOptionException?.(currentQuestion, response);
 
             throw new InvalidOptionException(
                 "The option sent is invalid: does not match the index or the value.",
@@ -108,9 +110,14 @@ export class Questioner {
         });
 
         if (this.isLastResponse()) {
-            await this.onFinish(this.responses);
+            await this?.onFinish?.(this.responses);
         }
+    }
+
+    isLastResponse() {
+        return this.responses.length === this.questions.length;
     }
 }
 
-class InvalidOptionException extends Error {}
+export class InvalidOptionException extends Error {}
+export class NoMoreQuestionsException extends Error {}

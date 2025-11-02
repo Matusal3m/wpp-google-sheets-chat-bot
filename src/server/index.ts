@@ -1,41 +1,35 @@
 import wpp from "@wppconnect-team/wppconnect";
 import {
-    type Question,
     type Student,
     StudentEvaluationQuestionnaire,
 } from "./student-evaluation-questionnarie";
+import { Questioner, type Question } from "./questioner";
 
-const client = await wpp.create({});
+const options = ["Ótimo", "Bom", "Regular", "Ruim"];
+
+const questions: Question[] = [
+    {
+        command: "Como você avaliaria a assiduidade do aluno?",
+        options,
+    },
+    {
+        command: "Como você avaliaria o cumprimento das atividades propostas?",
+        options,
+    },
+];
+
+const questioner = new Questioner(questions);
 
 const student: Student = {
     id: "student-1",
     name: "Matusalém de Sousa",
 };
 
-const questions: Question[] = [
-    {
-        command: "Primeira pergunta do questionário",
-        options: ["recebido", "não recebido (mentira)", "quero a pŕoxima"],
-    },
-    {
-        command: "Segunda pergunta do questionário",
-        options: ["recebido", "não recebido (mentira)", "quero a pŕoxima"],
-    },
-    {
-        command: "Terceira pergunta do questionário",
-        options: ["recebido", "não recebido (mentira)", "quero a pŕoxima"],
-    },
-    {
-        command: "Quarta pergunta do questionário",
-        options: ["recebido", "não recebido (mentira)", "quero a pŕoxima"],
-    },
-];
-
-console.log("QUESTIONNARIE INSTACIANTED");
+const client = await wpp.create({});
 
 const questionnarie = new StudentEvaluationQuestionnaire(
     client,
-    questions,
+    questioner,
     student,
     process.env.TEST_PHONE || "",
 );
