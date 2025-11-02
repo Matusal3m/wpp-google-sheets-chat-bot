@@ -16,7 +16,11 @@ export class StudentService extends BaseService<Student, StudentRepository> {
         super(new StudentRepository());
     }
 
-    async getBySupervisorPhone(phoneNumber: string): Promise<Student[]> {
-        return this.repository.findBySupervisorPhone(phoneNumber);
+    getAllFull() {
+        return this.repository.findAllFull();
+    }
+
+    getFullById(id: number) {
+        return this.repository.findFullById(id);
     }
 }

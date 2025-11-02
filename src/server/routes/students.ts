@@ -8,18 +8,33 @@ const service = new StudentService();
 
 export const students = new Elysia({ prefix: "students" })
     .decorate("service", service)
-    .get("/all", async () => ({
-        students: await service.getAll(),
-        message: "success",
-    }))
+    .get(
+        "/all",
+        async ({ query: { full } }) => ({
+            students: full
+                ? await service.getAllFull()
+                : await service.getAll(),
+            message: "success",
+        }),
+        {
+            query: t.Object({
+                full: t.Boolean(),
+            }),
+        }
+    )
     .get(
         "/:id",
-        async ({ params: { id } }) => ({
-            student: await service.getById(id),
+        async ({ query: { full }, params: { id } }) => ({
+            student: full
+                ? await service.getFullById(id)
+                : await service.getById(id),
             message: "success",
         }),
         {
             params: t.Object({ id: t.Number() }),
+            query: t.Object({
+                full: t.Boolean(),
+            }),
         }
     )
     .post(

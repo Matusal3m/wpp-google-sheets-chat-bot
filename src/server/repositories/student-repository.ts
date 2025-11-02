@@ -7,16 +7,40 @@ export class StudentRepository extends BaseRepository<Student> {
         super(db.student);
     }
 
-    async findBySupervisorPhone(phone: string): Promise<Student[]> {
-        return db.student.findMany({
-            where: { supervisorPhoneNumber: phone },
+    async findFullById(id: number) {
+        return db.student.findFirst({
+            where: { id },
+            include: {
+                Questionnaire: {
+                    include: {
+                        Questions: {
+                            select: {
+                                response: true,
+                            },
+                        },
+                    },
+                },
+                Supervisor: true,
+            },
+            omit: { supervisorId: true },
         });
     }
 
-    async findWithQuestionnaires(id: number) {
-        return db.student.findUnique({
-            where: { id },
-            include: { Questionnaires: true },
+    findAllFull() {
+        return db.student.findMany({
+            include: {
+                Questionnaire: {
+                    include: {
+                        Questions: {
+                            select: {
+                                response: true,
+                            },
+                        },
+                    },
+                },
+                Supervisor: true,
+            },
+            omit: { supervisorId: true },
         });
     }
 }
