@@ -7,14 +7,14 @@ import {
 const service = new SupervisorService();
 
 export const supervisors = new Elysia({ prefix: "supervisors" })
-    .get("/", async () => ({
-        data: await service.getAll(),
+    .get("/all", async () => ({
+        supervisors: await service.getAll(),
         message: "success",
     }))
     .get(
         "/:id",
         async ({ params: { id } }) => ({
-            data: await service.getById(id),
+            supervisor: await service.getById(id),
             message: "success",
         }),
         {
@@ -24,7 +24,7 @@ export const supervisors = new Elysia({ prefix: "supervisors" })
     .post(
         "/",
         async ({ body }) => ({
-            data: await service.create(body),
+            supervisor: await service.create(body),
             message: "success",
         }),
         {
@@ -34,7 +34,7 @@ export const supervisors = new Elysia({ prefix: "supervisors" })
     .patch(
         "/:id",
         async ({ body, params: { id } }) => ({
-            data: await service.update(id, body),
+            supervisor: await service.update(id, body),
             message: "success",
         }),
         {
@@ -44,10 +44,12 @@ export const supervisors = new Elysia({ prefix: "supervisors" })
     )
     .delete(
         "/:id",
-        async ({ params: { id } }) => ({
-            data: await service.delete(id),
-            message: "success",
-        }),
+        async ({ params: { id } }) => {
+            await service.delete(id);
+            return {
+                message: "success",
+            };
+        },
         {
             params: t.Object({ id: t.Number() }),
         }

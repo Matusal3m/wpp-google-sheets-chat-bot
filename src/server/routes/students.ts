@@ -8,14 +8,14 @@ const service = new StudentService();
 
 export const students = new Elysia({ prefix: "students" })
     .decorate("service", service)
-    .get("/", async () => ({
-        data: await service.getAll(),
+    .get("/all", async () => ({
+        students: await service.getAll(),
         message: "success",
     }))
     .get(
         "/:id",
         async ({ params: { id } }) => ({
-            data: await service.getById(id),
+            student: await service.getById(id),
             message: "success",
         }),
         {
@@ -25,7 +25,7 @@ export const students = new Elysia({ prefix: "students" })
     .post(
         "/",
         async ({ body }) => ({
-            data: await service.create(body),
+            student: await service.create(body),
             message: "success",
         }),
         {
@@ -38,7 +38,7 @@ export const students = new Elysia({ prefix: "students" })
     .patch(
         "/:id",
         async ({ body, params: { id } }) => ({
-            data: await service.update(id, body),
+            student: await service.update(id, body),
             message: "success",
         }),
         {
@@ -48,10 +48,12 @@ export const students = new Elysia({ prefix: "students" })
     )
     .delete(
         "/:id",
-        async ({ params: { id } }) => ({
-            data: await service.delete(id),
-            message: "success",
-        }),
+        async ({ params: { id } }) => {
+            await service.delete(id);
+            return {
+                message: "success",
+            };
+        },
         {
             params: t.Object({ id: t.Number() }),
         }

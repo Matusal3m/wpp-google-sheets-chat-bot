@@ -7,10 +7,10 @@ import { openapi } from "@elysiajs/openapi";
 
 const app = new Elysia()
     .get("/", index)
+    .group("api", app => app.use(questionnaires).use(students).use(supervisors))
     .use(openapi())
-    .use(questionnaires)
-    .use(students)
-    .use(supervisors)
     .listen(3000);
 
 console.log(`🚀 Server running at ${app.server?.port}`);
+
+export type App = typeof app;

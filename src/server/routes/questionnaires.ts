@@ -7,14 +7,14 @@ import {
 const service = new QuestionnaireService();
 
 export const questionnaires = new Elysia({ prefix: "questionnaires" })
-    .get("/", async () => ({
-        data: await service.getAll(),
+    .get("/all", async () => ({
+        questionnaires: await service.getAll(),
         message: "success",
     }))
     .get(
         "/:id",
         async ({ params: { id } }) => ({
-            data: await service.getById(id),
+            questionnaire: await service.getById(id),
             message: "success",
         }),
         {
@@ -24,7 +24,7 @@ export const questionnaires = new Elysia({ prefix: "questionnaires" })
     .post(
         "/",
         async ({ body }) => ({
-            data: await service.create(body),
+            questionnaire: await service.create(body),
             message: "success",
         }),
         {
@@ -34,7 +34,7 @@ export const questionnaires = new Elysia({ prefix: "questionnaires" })
     .patch(
         "/:id",
         async ({ body, params: { id } }) => ({
-            data: await service.update(id, body),
+            questionnaire: await service.update(id, body),
             message: "success",
         }),
         {
@@ -44,10 +44,12 @@ export const questionnaires = new Elysia({ prefix: "questionnaires" })
     )
     .delete(
         "/:id",
-        async ({ params: { id } }) => ({
-            data: await service.delete(id),
-            message: "success",
-        }),
+        async ({ params: { id } }) => {
+            await service.delete(id);
+            return {
+                message: "success",
+            };
+        },
         {
             params: t.Object({ id: t.Number() }),
         }
