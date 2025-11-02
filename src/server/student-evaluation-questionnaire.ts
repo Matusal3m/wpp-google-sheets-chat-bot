@@ -32,9 +32,7 @@ export class StudentEvaluationQuestionnaire {
         const { dispose } = this.wpp.onMessage(this.handleMessage.bind(this));
 
         this.questioner.onFinish = (responses) => {
-            console.log(responses);
             dispose();
-            console.log("CLOSE EVENT");
         };
     }
 

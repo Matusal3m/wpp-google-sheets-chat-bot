@@ -2,7 +2,7 @@ import wpp from "@wppconnect-team/wppconnect";
 import {
     type Student,
     StudentEvaluationQuestionnaire,
-} from "./student-evaluation-questionnarie";
+} from "./student-evaluation-questionnaire";
 import { Questioner, type Question } from "./questioner";
 
 const options = ["Ótimo", "Bom", "Regular", "Ruim"];
@@ -31,7 +31,7 @@ const questionnarie = new StudentEvaluationQuestionnaire(
     client,
     questioner,
     student,
-    process.env.TEST_PHONE || "",
+    process.env.TEST_PHONE || ""
 );
 
 await questionnarie.execute();
