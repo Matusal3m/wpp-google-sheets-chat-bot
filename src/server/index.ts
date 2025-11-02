@@ -1,37 +1,12 @@
-import wpp from "@wppconnect-team/wppconnect";
-import {
-    type Student,
-    StudentEvaluationQuestionnaire,
-} from "./student-evaluation-questionnaire";
-import { Questioner, type Question } from "./questioner";
+import index from "@/app/index.html";
+import { Elysia } from "elysia";
+import { questionnaires } from "./routes/questionnaires";
+import { students } from "./routes/students";
 
-const options = ["Ótimo", "Bom", "Regular", "Ruim"];
+const app = new Elysia()
+    .get("/", index)
+    .use(questionnaires)
+    .use(students)
+    .listen(3000);
 
-const questions: Question[] = [
-    {
-        command: "Como você avaliaria a assiduidade do aluno?",
-        options,
-    },
-    {
-        command: "Como você avaliaria o cumprimento das atividades propostas?",
-        options,
-    },
-];
-
-const questioner = new Questioner(questions);
-
-const student: Student = {
-    id: "student-1",
-    name: "Matusalém de Sousa",
-};
-
-const client = await wpp.create({});
-
-const questionnarie = new StudentEvaluationQuestionnaire(
-    client,
-    questioner,
-    student,
-    process.env.TEST_PHONE || ""
-);
-
-await questionnarie.execute();
+console.log(`🚀 Server running at ${app.server?.port}`);

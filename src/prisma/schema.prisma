@@ -1,0 +1,39 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Student {
+    id                    Int             @id @default(autoincrement())
+    name                  String
+    supervisorPhoneNumber String
+    Questionnaires        Questionnaire[]
+}
+
+model Supervisor {
+    id          Int    @id @default(autoincrement())
+    name        String
+    phoneNumber String @unique
+}
+
+model Questionnaire {
+    id             Int        @id @default(autoincrement())
+    studentId      Int
+    defaultOptions String[]
+    student        Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    Questions      Question[]
+}
+
+model Question {
+    id              Int      @id @default(autoincrement())
+    questionnaireId Int
+    command         String
+    response        String?
+    options         String[]
+
+    Questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+}

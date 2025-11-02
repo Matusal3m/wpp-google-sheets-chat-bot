@@ -1,22 +1,20 @@
-export interface Question {
-    command: string;
-    options?: string[];
-}
+import { db } from "@/prisma";
+import type { Question } from "@prisma/client";
 
 export type Response = {
-    value: string | number;
+    option: string;
     question: Question;
 };
 
 export type OnQuestionnaireFinish = (
-    responses: Response[],
+    responses: Response[]
 ) => Promise<void> | void;
 
 export type OnQuestionnaireInit = () => Promise<void> | void;
 
 export type OnQuestionnaireOptionException = (
     currentQuestion: Question,
-    response: string,
+    response: string
 ) => Promise<void> | void;
 
 export class Questioner {
@@ -24,10 +22,11 @@ export class Questioner {
     private responses: Response[] = [];
 
     constructor(
+        private questionnaireId: number,
         private questions: Question[],
         public onFinish?: OnQuestionnaireFinish,
         public onInit?: OnQuestionnaireInit,
-        public onOptionException?: OnQuestionnaireOptionException,
+        public onOptionException?: OnQuestionnaireOptionException
     ) {}
 
     private getCurrentQuestion() {
@@ -65,8 +64,27 @@ export class Questioner {
             option.toLowerCase() === response.toLowerCase();
 
         return question.options.find(
-            (option, index) => matchIndex(index) || matchValue(option),
+            (option, index) => matchIndex(index) || matchValue(option)
         );
+    }
+
+    private isLastResponse() {
+        return this.responses.length === this.questions.length;
+    }
+
+    private normalizeResponses(responses: Response[]) {
+        const result = [];
+
+        for (const response of responses) {
+            result.push({
+                id: response.question.id,
+                command: response.question.command,
+                questionnaireId: this.questionnaireId,
+                response: String(response.option),
+            });
+        }
+
+        return result;
     }
 
     async nextQuestion() {
@@ -78,7 +96,7 @@ export class Questioner {
 
         if (!question) {
             throw new NoMoreQuestionsException(
-                "The is no more questions available on the quesitonnaire.",
+                "The is no more questions available on the quesitonnaire."
             );
         }
 
@@ -100,13 +118,13 @@ export class Questioner {
             await this?.onOptionException?.(currentQuestion, response);
 
             throw new InvalidOptionException(
-                "The option sent is invalid: does not match the index or the value.",
+                "The option sent is invalid: does not match the index or the value."
             );
         }
 
         this.responses.push({
             question: currentQuestion,
-            value: option,
+            option: option,
         });
 
         if (this.isLastResponse()) {
@@ -114,8 +132,32 @@ export class Questioner {
         }
     }
 
-    isLastResponse() {
-        return this.responses.length === this.questions.length;
+    async save(responses?: Response[]) {
+        const normalizedQuestions = this.normalizeResponses(
+            responses ?? this.responses
+        );
+
+        const promises = [];
+        for (const { id, ...question } of normalizedQuestions) {
+            promises.push(
+                db.question.update({
+                    data: question,
+                    where: { id },
+                })
+            );
+        }
+
+        try {
+            await Promise.all(promises);
+            console.info(
+                `Saved questions to Questionnaire ${this.questionnaireId}.`
+            );
+        } catch (error) {
+            console.error(
+                `Something whent wrong saving questions of questionnaire ${this.questionnaireId}.`
+            );
+            console.error(error);
+        }
     }
 }
 
