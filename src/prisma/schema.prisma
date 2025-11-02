@@ -8,32 +8,33 @@ generator client {
 }
 
 model Student {
-    id                    Int             @id @default(autoincrement())
-    name                  String
-    supervisorPhoneNumber String
-    Questionnaires        Questionnaire[]
+    id            Int            @id @default(autoincrement())
+    name          String
+    supervisorId  Int            @unique
+    Questionnaire Questionnaire?
+    Supervisor    Supervisor     @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
 }
 
 model Supervisor {
-    id          Int    @id @default(autoincrement())
+    id          Int       @id @default(autoincrement())
     name        String
-    phoneNumber String @unique
+    phoneNumber String    @unique
+    Student     Student[]
 }
 
 model Questionnaire {
     id             Int        @id @default(autoincrement())
-    studentId      Int
+    studentId      Int        @unique
     defaultOptions String[]
     student        Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
     Questions      Question[]
 }
 
 model Question {
-    id              Int      @id @default(autoincrement())
+    id              Int           @id @default(autoincrement())
     questionnaireId Int
     command         String
     response        String?
     options         String[]
-
-    Questionnaire Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+    Questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
 }
