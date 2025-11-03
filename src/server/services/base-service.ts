@@ -1,9 +1,12 @@
-import type { BaseRepository } from "../repositories/base-repository";
+import type { GenericCRUDRepository } from "../repositories/base-repository";
 
 type WithoutId<T> = Omit<T, "id">;
 type PartialWithoutId<T> = Partial<Omit<T, "id">>;
 
-export abstract class BaseService<T, R extends BaseRepository<T>> {
+export abstract class GenericCRUDService<
+    T,
+    R extends GenericCRUDRepository<T>
+> {
     constructor(protected readonly repository: R) {}
 
     create(data: WithoutId<T>): Promise<T> {

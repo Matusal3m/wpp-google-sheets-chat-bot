@@ -1,8 +1,8 @@
 import { db } from "@/prisma";
-import { BaseRepository } from "./base-repository";
+import { GenericCRUDRepository } from "./base-repository";
 import type { Question } from "@prisma/client";
 
-export class QuestionRepository extends BaseRepository<Question> {
+export class QuestionRepository extends GenericCRUDRepository<Question> {
     constructor() {
         super(db.question);
     }

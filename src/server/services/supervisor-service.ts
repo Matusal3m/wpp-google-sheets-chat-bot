@@ -1,6 +1,6 @@
 import { SupervisorRepository } from "../repositories/supervisor-repository";
 import type { Supervisor } from "@prisma/client";
-import { BaseService } from "./base-service";
+import { GenericCRUDService } from "./base-service";
 import { t } from "elysia";
 
 export const TCreateSupervisorInput = t.Object({
@@ -11,7 +11,7 @@ export const TCreateSupervisorInput = t.Object({
 export type CreateSupervisorInput = typeof TCreateSupervisorInput.static;
 export type UpdateSupervisorInput = Partial<CreateSupervisorInput>;
 
-export class SupervisorService extends BaseService<
+export class SupervisorService extends GenericCRUDService<
     Supervisor,
     SupervisorRepository
 > {

@@ -1,6 +1,6 @@
 import { StudentRepository } from "../repositories/student-repository";
 import type { Student } from "@prisma/client";
-import { BaseService } from "./base-service";
+import { GenericCRUDService } from "./base-service";
 import { t } from "elysia";
 
 export const TCreateStudentInput = t.Object({
@@ -11,7 +11,10 @@ export const TCreateStudentInput = t.Object({
 export type CreateStudentInput = typeof TCreateStudentInput.static;
 export type UpdateStudentInput = Partial<CreateStudentInput>;
 
-export class StudentService extends BaseService<Student, StudentRepository> {
+export class StudentService extends GenericCRUDService<
+    Student,
+    StudentRepository
+> {
     constructor() {
         super(new StudentRepository());
     }

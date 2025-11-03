@@ -3,7 +3,7 @@ import { t } from "elysia";
 import type { Questionnaire } from "@prisma/client";
 import { StudentRepository } from "../repositories/student-repository";
 import { QuestionnaireRepository } from "../repositories/questionnaire-repository";
-import { BaseService } from "./base-service";
+import { GenericCRUDService } from "./base-service";
 
 export const TCreateQuestionInput = t.Object({
     command: t.String(),
@@ -20,7 +20,7 @@ export const TCreateQuestionnaireInput = t.Object({
 
 export type CreateQuestionnaireInput = typeof TCreateQuestionnaireInput.static;
 
-export class QuestionnaireService extends BaseService<
+export class QuestionnaireService extends GenericCRUDService<
     Questionnaire,
     QuestionnaireRepository
 > {

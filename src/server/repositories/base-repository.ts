@@ -1,7 +1,7 @@
 type WithoutId<T> = Omit<T, "id">;
 type PartialWithoutId<T> = Partial<Omit<T, "id">>;
 
-export abstract class BaseRepository<T> {
+export abstract class GenericCRUDRepository<T> {
     constructor(protected readonly model: any) {}
 
     create(data: WithoutId<T>): Promise<T> {
