@@ -1,6 +1,6 @@
 import { SupervisorRepository } from "../repositories/supervisor-repository";
 import type { Supervisor } from "@prisma/client";
-import { GenericCRUDService } from "./base-service";
+import { GenericCRUDService } from "./generic-crud-service";
 import { t } from "elysia";
 
 export const TCreateSupervisorInput = t.Object({

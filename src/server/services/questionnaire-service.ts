@@ -3,7 +3,7 @@ import { t } from "elysia";
 import type { Questionnaire } from "@prisma/client";
 import { StudentRepository } from "../repositories/student-repository";
 import { QuestionnaireRepository } from "../repositories/questionnaire-repository";
-import { GenericCRUDService } from "./base-service";
+import { GenericCRUDService } from "./generic-crud-service";
 
 export const TCreateQuestionInput = t.Object({
     command: t.String(),

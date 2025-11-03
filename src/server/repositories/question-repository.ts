@@ -1,5 +1,5 @@
 import { db } from "@/prisma";
-import { GenericCRUDRepository } from "./base-repository";
+import { GenericCRUDRepository } from "./generic-crud-repository";
 import type { Question } from "@prisma/client";
 
 export class QuestionRepository extends GenericCRUDRepository<Question> {

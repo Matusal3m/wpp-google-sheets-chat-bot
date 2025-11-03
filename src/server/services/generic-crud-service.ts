@@ -1,4 +1,4 @@
-import type { GenericCRUDRepository } from "../repositories/base-repository";
+import type { GenericCRUDRepository } from "../repositories/generic-crud-repository";
 
 type WithoutId<T> = Omit<T, "id">;
 type PartialWithoutId<T> = Partial<Omit<T, "id">>;

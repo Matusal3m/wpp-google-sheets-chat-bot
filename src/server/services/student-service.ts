@@ -1,6 +1,6 @@
 import { StudentRepository } from "../repositories/student-repository";
 import type { Student } from "@prisma/client";
-import { GenericCRUDService } from "./base-service";
+import { GenericCRUDService } from "./generic-crud-service";
 import { t } from "elysia";
 
 export const TCreateStudentInput = t.Object({
