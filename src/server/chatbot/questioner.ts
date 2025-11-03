@@ -1,13 +1,11 @@
-import { db } from "@/prisma";
 import type { Question } from "@prisma/client";
 
-export type Response = {
-    option: string;
-    question: Question;
+export type AnsweredQuestion = Omit<Question, "response"> & {
+    response: string;
 };
 
 export type OnQuestionnaireFinish = (
-    responses: Response[]
+    answeredQuestions: AnsweredQuestion[]
 ) => Promise<void> | void;
 
 export type OnQuestionnaireInit = () => Promise<void> | void;
@@ -19,10 +17,9 @@ export type OnQuestionnaireOptionException = (
 
 export class Questioner {
     private nextQuestionIndex = 0;
-    private responses: Response[] = [];
+    private answeredQuestions: AnsweredQuestion[] = [];
 
     constructor(
-        private questionnaireId: number,
         private questions: Question[],
         public onFinish?: OnQuestionnaireFinish,
         public onInit?: OnQuestionnaireInit,
@@ -69,22 +66,7 @@ export class Questioner {
     }
 
     private isLastResponse() {
-        return this.responses.length === this.questions.length;
-    }
-
-    private normalizeResponses(responses: Response[]) {
-        const result = [];
-
-        for (const response of responses) {
-            result.push({
-                id: response.question.id,
-                command: response.question.command,
-                questionnaireId: this.questionnaireId,
-                response: String(response.option),
-            });
-        }
-
-        return result;
+        return this.answeredQuestions.length === this.questions.length;
     }
 
     async nextQuestion() {
@@ -122,41 +104,13 @@ export class Questioner {
             );
         }
 
-        this.responses.push({
-            question: currentQuestion,
-            option: option,
+        this.answeredQuestions.push({
+            ...currentQuestion,
+            response: option,
         });
 
         if (this.isLastResponse()) {
-            await this?.onFinish?.(this.responses);
-        }
-    }
-
-    async save(responses?: Response[]) {
-        const normalizedQuestions = this.normalizeResponses(
-            responses ?? this.responses
-        );
-
-        const promises = [];
-        for (const { id, ...question } of normalizedQuestions) {
-            promises.push(
-                db.question.update({
-                    data: question,
-                    where: { id },
-                })
-            );
-        }
-
-        try {
-            await Promise.all(promises);
-            console.info(
-                `Saved questions to Questionnaire ${this.questionnaireId}.`
-            );
-        } catch (error) {
-            console.error(
-                `Something whent wrong saving questions of questionnaire ${this.questionnaireId}.`
-            );
-            console.error(error);
+            await this?.onFinish?.(this.answeredQuestions);
         }
     }
 }

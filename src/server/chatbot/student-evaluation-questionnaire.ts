@@ -2,9 +2,14 @@ import { type Message, Whatsapp } from "@wppconnect-team/wppconnect";
 import {
     InvalidOptionException,
     NoMoreQuestionsException,
+    type AnsweredQuestion,
     type Questioner,
 } from "./questioner";
-import type { Student } from "@prisma/client";
+
+type EvaluationQuestionnaireResponse = {
+    dispose: () => void;
+    answeredQuestions: AnsweredQuestion[];
+};
 
 export class StudentEvaluationQuestionnaire {
     private wasInitialized = false;
@@ -12,24 +17,28 @@ export class StudentEvaluationQuestionnaire {
 
     constructor(
         private readonly wpp: Whatsapp,
-        private questioner: Questioner,
-        private student: Student
+        private readonly questioner: Questioner,
+        private readonly studentName: string,
+        private readonly to: string
     ) {}
 
-    async execute() {
-        const initialMessage = await this.wpp.sendText(
-            this.student.supervisorPhoneNumber,
-            `Avaliação para ${this.student.name.toUpperCase()}\n` +
-                `Envie qualquer mensagem para iniciar o questionário.`
-        );
-        this.initialMessageTimestamp = initialMessage.timestamp;
+    execute(): Promise<EvaluationQuestionnaireResponse> {
+        return new Promise(async resolve => {
+            const initialMessage = await this.wpp.sendText(
+                this.to,
+                `Avaliação para ${this.studentName.toUpperCase()}\n` +
+                    `Envie qualquer mensagem para iniciar o questionário.`
+            );
+            this.initialMessageTimestamp = initialMessage.timestamp;
 
-        const { dispose } = this.wpp.onMessage(this.handleMessage.bind(this));
+            const { dispose } = this.wpp.onMessage(
+                this.handleMessage.bind(this)
+            );
 
-        this.questioner.onFinish = responses => {
-            dispose();
-            this.questioner.save(responses);
-        };
+            this.questioner.onFinish = answeredQuestions => {
+                resolve({ dispose, answeredQuestions });
+            };
+        });
     }
 
     private async handleMessage(message: Message) {
@@ -42,23 +51,20 @@ export class StudentEvaluationQuestionnaire {
 
             const question = await this.questioner.nextQuestion();
 
-            await this.wpp.sendText(
-                this.student.supervisorPhoneNumber,
-                question.inText
-            );
+            await this.wpp.sendText(this.to, question.inText);
 
             this.wasInitialized = true;
         } catch (error: any) {
             if (error instanceof NoMoreQuestionsException) {
                 console.warn(
-                    `The is no more questions available on ${this.student.name} questionnarie.`
+                    `The is no more questions available on ${this.studentName} questionnarie.`
                 );
                 return;
             }
 
             if (error instanceof InvalidOptionException) {
                 console.warn(
-                    `A invalid option "${message.content}" was sent on ${this.student.name} questionnarie.`
+                    `A invalid option "${message.content}" was sent on ${this.studentName} questionnarie.`
                 );
                 return;
             }
@@ -69,7 +75,7 @@ export class StudentEvaluationQuestionnaire {
 
     private isValidMessage(message: Message) {
         if (message.isGroupMsg) return;
-        if (!message.id.includes(this.student.supervisorPhoneNumber)) return;
+        if (!message.id.includes(this.to)) return;
         if (message.timestamp < this.initialMessageTimestamp) return;
 
         return true;
