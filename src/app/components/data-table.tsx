@@ -43,7 +43,6 @@ import {
 } from "@/app/components/ui/table";
 
 import { cn } from "@/app/lib/utils";
-import { ModeToggle } from "./mode-toggle";
 
 export type Student = {
   name: string;
@@ -260,7 +259,6 @@ export const DataTableWithExport = ({ data }: { data: Student[] }) => {
           />
         </div>
         <div className="flex items-center space-x-2">
-          <ModeToggle />
           <div className="text-muted-foreground text-sm">
             {table.getSelectedRowModel().rows.length > 0 && (
               <span className="mr-2">
