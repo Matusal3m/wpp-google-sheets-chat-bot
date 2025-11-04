@@ -1,34 +1,31 @@
-import { create } from "@wppconnect-team/wppconnect";
+import { create, Whatsapp } from "@wppconnect-team/wppconnect";
 import { ChatBotService } from "../services/chat-bot-service";
 
 export class Client {
-    private service: ChatBotService | null = null;
+    private wpp: Whatsapp | null = null;
 
     destroy() {
-        this.service = null;
+        this.wpp = null;
     }
 
     async load(onQrCode: (qrcode: string) => any) {
-        if (this.service) return this.service;
+        if (this.wpp) return new ChatBotService(this.wpp);
 
-        const wpp = await create({
-            autoClose: 0,
+        this.wpp = await create({
+            autoClose: 20000,
             disableWelcome: true,
-            waitForLogin: false,
             catchQR: qr => {
                 console.log({ qr });
                 onQrCode(qr);
             },
         });
 
-        await wpp.start();
+        await this.wpp.start();
 
-        this.service = new ChatBotService(wpp);
-
-        return this.service;
+        return new ChatBotService(this.wpp);
     }
 
     isLoaded() {
-        return !!this.service;
+        return !!this.wpp;
     }
 }

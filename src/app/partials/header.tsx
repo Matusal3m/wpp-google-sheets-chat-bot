@@ -1,0 +1,43 @@
+import React from "react";
+import { socket } from "../lib/api";
+import { ModeToggle } from "../components/mode-toggle";
+import { Badge } from "../components/ui/badge";
+import { Card, CardHeader, CardTitle } from "../components/ui/card";
+import { QrCodeDialog } from "./qrcode-panel";
+
+export function Header() {
+  const [botStatus, setBotStatus] = React.useState({ up: false });
+  const bot = socket.status.subscribe();
+
+  React.useEffect(() => {
+    bot.on("message", ({ data: status }) => setBotStatus(status));
+
+    return () => {
+      bot.close();
+    };
+  }, [bot]);
+
+  return (
+    <Card className="rounded-none border-b border-border shadow-none bg-background">
+      <CardHeader className="flex flex-row items-center justify-between px-6">
+        <CardTitle className="text-lg font-semibold text-foreground">
+          Painel de controle do chatbot
+        </CardTitle>
+
+        <div className="flex items-center gap-4">
+          <QrCodeDialog />
+          <Badge
+            variant={"secondary"}
+            className={
+              botStatus.up
+                ? "border-green-500 text-green-600 dark:text-green-400"
+                : "border-red-500 text-red-600 dark:text-red-400"
+            }>
+            {botStatus.up ? "Conectado" : "Offline"}
+          </Badge>
+          <ModeToggle />
+        </div>
+      </CardHeader>
+    </Card>
+  );
+}
