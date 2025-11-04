@@ -4,6 +4,7 @@ import { openapi } from "@elysiajs/openapi";
 import { questionnaires } from "./routes/questionnaires";
 import { students } from "./routes/students";
 import { supervisors } from "./routes/supervisors";
+import "./chatbot";
 
 const app = new Elysia()
     .get("/", index)
@@ -14,3 +15,4 @@ const app = new Elysia()
     });
 
 export type App = typeof app;
+export type { Socket } from "./chatbot";

@@ -1,11 +1,10 @@
-import { type Message } from "@wppconnect-team/wppconnect";
+import { Whatsapp, type Message } from "@wppconnect-team/wppconnect";
 import {
     InvalidOptionException,
     NoMoreQuestionsException,
     type AnsweredQuestion,
     type Questioner,
 } from "./questioner";
-import type { WhatsappIPC } from "../ipc/whatsapp/whatsapp";
 
 type EvaluationQuestionnaireResponse = {
     dispose: () => void;
@@ -17,7 +16,7 @@ export class StudentEvaluationQuestionnaire {
     private initialMessageTimestamp = 0;
 
     constructor(
-        private readonly wpp: WhatsappIPC,
+        private readonly wpp: Whatsapp,
         private readonly questioner: Questioner,
         private readonly studentName: string,
         private readonly to: string
@@ -25,16 +24,14 @@ export class StudentEvaluationQuestionnaire {
 
     execute(): Promise<EvaluationQuestionnaireResponse> {
         return new Promise(async resolve => {
-            const initialMessage = await this.wpp.call(
-                "sendText",
+            const initialMessage = await this.wpp.sendText(
                 this.to,
                 `Avaliação para ${this.studentName.toUpperCase()}\n` +
                     `Envie qualquer mensagem para iniciar o questionário.`
             );
             this.initialMessageTimestamp = initialMessage.timestamp;
 
-            const { dispose } = await this.wpp.call(
-                "onMessage",
+            const { dispose } = this.wpp.onMessage(
                 this.handleMessage.bind(this)
             );
 
@@ -54,7 +51,7 @@ export class StudentEvaluationQuestionnaire {
 
             const question = await this.questioner.nextQuestion();
 
-            await this.wpp.call("sendText", this.to, question.inText);
+            await this.wpp.sendText(this.to, question.inText);
 
             this.wasInitialized = true;
         } catch (error: any) {
