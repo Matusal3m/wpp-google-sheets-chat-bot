@@ -1,7 +1,8 @@
 import { ThemeProvider } from "./components/theme-provider";
 import { Header } from "./partials/header";
-import { Footer } from "./partials/footer";
 import "./index.css";
+import { ChatBotForm } from "./partials/chat-bot-form";
+import { ChatBotPanel } from "./partials/chatbot-panel";
 
 export function App() {
   return (
@@ -9,9 +10,10 @@ export function App() {
       <div className="w-screen flex flex-col min-h-screen">
         <Header />
 
-        <main className="flex-1 flex flex-col gap-6 p-6 "></main>
-
-        <Footer />
+        <main className="flex-1 flex flex-col md:flex-row justify-between gap-6 p-6 ">
+          <ChatBotForm />
+          <ChatBotPanel />
+        </main>
       </div>
     </ThemeProvider>
   );

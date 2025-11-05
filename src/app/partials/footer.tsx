@@ -5,7 +5,7 @@ export function Footer() {
   const email = "matusalem.dev@gmail.com";
 
   return (
-    <footer className="border-t border-border bg-background text-muted-foreground text-sm py-6 mt-10">
+    <footer className="w-full border-t border-border bg-background text-muted-foreground text-sm py-6 mt-10">
       <div className="container mx-auto flex flex-col items-center gap-3 text-center">
         <p className="flex items-center gap-2">
           Desenvolvido com{" "}
@@ -14,8 +14,6 @@ export function Footer() {
             Matusalém de Sousa
           </span>
         </p>
-
-        <Separator className="w-12" />
 
         <div className="flex items-center gap-5">
           <a
