@@ -8,7 +8,8 @@ export function Footer() {
     <footer className="border-t border-border bg-background text-muted-foreground text-sm py-6 mt-10">
       <div className="container mx-auto flex flex-col items-center gap-3 text-center">
         <p className="flex items-center gap-2">
-          Desenvolvido com <Coffee className="w-4 h-4 text-amber-950" /> por{" "}
+          Desenvolvido com{" "}
+          <Coffee className="w-4 h-4 text-[#6F4E37] dark:text-[#6F4E37]" /> por{" "}
           <span className="font-medium text-foreground">
             Matusalém de Sousa
           </span>

@@ -1,7 +1,7 @@
 import { ThemeProvider } from "./components/theme-provider";
-import "./index.css";
 import { Header } from "./partials/header";
 import { Footer } from "./partials/footer";
+import "./index.css";
 
 export function App() {
   return (
