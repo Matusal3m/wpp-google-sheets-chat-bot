@@ -46,7 +46,9 @@ export class StudentEvaluationQuestionnaire {
 
         try {
             if (this.wasInitialized) {
-                await this.questioner.handleWaitingResponse(message.content);
+                await this.questioner.handleWaitingResponse(
+                    Number(message.content)
+                );
             }
 
             const question = await this.questioner.nextQuestion();

@@ -5,7 +5,7 @@ import { t } from "elysia";
 
 export const TCreateSupervisorInput = t.Object({
     name: t.String(),
-    phoneNumber: t.String(),
+    phone: t.String(),
 });
 
 export type CreateSupervisorInput = typeof TCreateSupervisorInput.static;

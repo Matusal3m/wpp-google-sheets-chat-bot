@@ -8,6 +8,6 @@ export class SupervisorRepository extends GenericCRUDRepository<Supervisor> {
     }
 
     async findByPhone(phone: string): Promise<Supervisor | null> {
-        return db.supervisor.findUnique({ where: { phoneNumber: phone } });
+        return db.supervisor.findUnique({ where: { phone } });
     }
 }

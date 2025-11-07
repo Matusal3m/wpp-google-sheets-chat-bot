@@ -7,34 +7,31 @@ generator client {
     provider = "prisma-client-js"
 }
 
-model Student {
-    id            Int            @id @default(autoincrement())
-    name          String
-    supervisorId  Int            @unique
-    Questionnaire Questionnaire?
-    Supervisor    Supervisor     @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+model Company {
+    id           Int        @id @default(autoincrement())
+    name         String
+    supervisor   Supervisor @relation(fields: [supervisorId], references: [id])
+    supervisorId Int        @unique
+    students     Student[]
 }
 
 model Supervisor {
-    id          Int       @id @default(autoincrement())
-    name        String
-    phoneNumber String    @unique
-    Student     Student[]
+    id       Int       @id @default(autoincrement())
+    name     String
+    phone    String    @unique
+    company  Company?
+    students Student[]
 }
 
-model Questionnaire {
-    id             Int        @id @default(autoincrement())
-    studentId      Int        @unique
-    defaultOptions String[]
-    student        Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
-    Questions      Question[]
-}
-
-model Question {
-    id              Int           @id @default(autoincrement())
-    questionnaireId Int
-    command         String
-    response        String?
-    options         String[]
-    Questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+model Student {
+    id               Int        @id @default(autoincrement())
+    name             String
+    enrollmentNumber String
+    area             String
+    callNumber       String
+    supervisor       Supervisor @relation(fields: [supervisorId], references: [id])
+    supervisorId     Int
+    company          Company    @relation(fields: [companyId], references: [id])
+    companyId        Int
+    hasGrade         Boolean    @default(false)
 }

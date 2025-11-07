@@ -4,7 +4,7 @@ type WithoutId<T> = Omit<T, "id">;
 type PartialWithoutId<T> = Partial<Omit<T, "id">>;
 
 export abstract class GenericCRUDService<
-    T,
+    T extends Record<string, any>,
     R extends GenericCRUDRepository<T>
 > {
     constructor(protected readonly repository: R) {}

@@ -11,36 +11,20 @@ export class StudentRepository extends GenericCRUDRepository<Student> {
         return db.student.findFirst({
             where: { id },
             include: {
-                Questionnaire: {
-                    include: {
-                        Questions: {
-                            select: {
-                                response: true,
-                            },
-                        },
-                    },
-                },
-                Supervisor: true,
+                supervisor: true,
+                company: true,
             },
-            omit: { supervisorId: true },
+            omit: { enrollmentNumber: true, companyId: true },
         });
     }
 
     findAllFull() {
         return db.student.findMany({
             include: {
-                Questionnaire: {
-                    include: {
-                        Questions: {
-                            select: {
-                                response: true,
-                            },
-                        },
-                    },
-                },
-                Supervisor: true,
+                supervisor: true,
+                company: true,
             },
-            omit: { supervisorId: true },
+            omit: { enrollmentNumber: true, companyId: true },
         });
     }
 }
