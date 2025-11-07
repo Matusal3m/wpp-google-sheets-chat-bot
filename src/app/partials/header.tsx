@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { socket } from "../lib/api";
+import React from "react";
 import { ModeToggle } from "../components/mode-toggle";
 import { Badge } from "../components/ui/badge";
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { QrCodeDialog } from "./qrcode-panel";
+import type { Socket } from "socket.io-client";
+import type { DefaultEventsMap } from "socket.io";
 
 export type BotStatus = {
   up: boolean;
@@ -11,15 +12,18 @@ export type BotStatus = {
   isLoadingQrCode: boolean;
 };
 
-export function Header() {
+export function Header({
+  socket,
+}: {
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+}) {
   const [status, setStatus] = React.useState<BotStatus>({
     up: false,
     isLoadingQrCode: false,
     isLogged: false,
   });
-  const botStatus = socket.status.subscribe();
 
-  botStatus.on("message", ({ data }) => {
+  socket.on("status:update", data => {
     console.log(data);
     setStatus(data);
   });
@@ -32,7 +36,7 @@ export function Header() {
         </CardTitle>
 
         <div className="flex items-center gap-4">
-          <QrCodeDialog status={status} />
+          <QrCodeDialog status={status} socket={socket} />
           <Badge
             variant={"secondary"}
             className={

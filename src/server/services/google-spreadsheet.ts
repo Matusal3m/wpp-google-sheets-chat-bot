@@ -3,22 +3,23 @@ import {
     GoogleSpreadsheet as Sheet,
 } from "google-spreadsheet";
 import { JWT } from "google-auth-library";
+import creds from "../../../config/google-jwt.json";
 
 export class GoogleSpreadsheet {
     constructor(private sheet: GoogleSpreadsheetWorksheet) {}
 
-    static async init(sheetId: string) {
+    static async init() {
         const serviceAccountAuth = new JWT({
-            email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-            key: process.env.GOOGLE_PRIVATE_KEY,
+            email: creds.client_email,
+            key: creds.private_key,
             scopes: ["https://www.googleapis.com/auth/spreadsheets"],
         });
 
-        const doc = new Sheet(sheetId, serviceAccountAuth);
+        const doc = new Sheet(process.env.SHEET_ID!, serviceAccountAuth);
 
         await doc.loadInfo();
 
-        const sheet = doc.sheetsByTitle[process.env.SHEET!];
+        const sheet = doc.sheetsByIndex[0];
 
         if (!sheet)
             throw new GoogleSheetUndefined("Google Sheet came undefined");
@@ -27,9 +28,20 @@ export class GoogleSpreadsheet {
     }
 
     async addStudent(studentName: string, grade: string) {
-        this.sheet.addRows([{ [studentName]: grade }]);
+        await this.sheet.loadHeaderRow();
+        const headers = this.sheet.headerValues;
 
-        console.log(`ESTUDANTE ADICIONADO: ${studentName}`);
+        if (!headers.includes(studentName)) {
+            headers.push(studentName);
+            await this.sheet.setHeaderRow(headers);
+            console.log(`Coluna criada: ${studentName}`);
+        }
+
+        const rowData: Record<string, string> = {};
+        rowData[studentName] = grade;
+
+        await this.sheet.addRow(rowData);
+        console.log(`Nota adicionada para ${studentName}: ${grade}`);
     }
 }
 

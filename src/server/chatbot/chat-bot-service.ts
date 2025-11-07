@@ -1,7 +1,7 @@
-import { Questioner } from "../chatbot/questioner";
-import { StudentEvaluationQuestionnaire } from "../chatbot/student-evaluation-questionnaire";
+import { Questioner } from "./questioner";
+import { StudentEvaluationQuestionnaire } from "./student-evaluation-questionnaire";
 import type { Whatsapp } from "@wppconnect-team/wppconnect";
-import type { GoogleSpreadsheet } from "./google-spreadsheet";
+import type { GoogleSpreadsheet } from "../services/google-spreadsheet";
 
 export class ChatBotService {
     constructor(
@@ -53,7 +53,7 @@ export class ChatBotService {
 
             console.info(`All students from ${phone} answered`);
         } catch (error) {
-            console.warn(`Could not start quesitonnaire for ${phone}`);
+            console.warn(`Could not start questionnaire for ${phone}`);
             console.error(error);
         }
     }

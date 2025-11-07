@@ -1,38 +1,62 @@
+import express from "express";
+import http from "http";
+import { Server as SocketIOServer } from "socket.io";
+import { Client } from "./chatbot";
 import index from "@/app/index.html";
-import { Elysia, t } from "elysia";
-import { openapi } from "@elysiajs/openapi";
-import { students } from "./routes/students";
-import { supervisors } from "./routes/supervisors";
-import { Client } from "./chatbot/client";
-import "./chatbot";
+
+const app = express();
+app.use(express.json());
+5585987196621;
+Bun.serve({
+    port: 3000,
+    routes: {
+        "/*": index,
+        "/startChat": {
+            async POST(req) {
+                const body = (await req.json()) as any;
+                let { phone, students } = body;
+                const bot = await client.load();
+                await bot.multipleQuestionnaires(students, phone);
+                return new Response();
+            },
+        },
+    },
+});
+
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+    cors: { origin: "*" },
+});
 
 const client = new Client();
+const statusConnections = new Set<any>();
 
-const api = new Elysia({ prefix: "api", websocket: { ping(ws, data) {} } })
-    .use(students)
-    .use(supervisors)
-    .post(
-        "/startChat",
-        async ({ body: { phone, students } }) => {
-            const bot = await client.load();
+client.onStatusChange(status => {
+    for (const socket of statusConnections) {
+        socket.emit("status:update", status);
+    }
+});
 
-            await bot.multipleQuestionnaires(students, phone);
-        },
-        {
-            body: t.Object({
-                students: t.ArrayString(),
-                phone: t.String(),
-            }),
-        }
-    );
+io.on("connection", socket => {
+    console.log(`📡 New client connected: ${socket.id}`);
 
-const app = new Elysia()
-    .use(openapi())
-    .get("/", index)
-    .use(api)
-    .listen(3000, ({ port }) => {
-        console.log(`🚀 Server running at ${port}`);
+    socket.on("qrcode:listen", async () => {
+        await client.load(qr => {
+            socket.emit("qrcode:update", qr);
+        });
     });
 
-export type App = typeof app;
-export type { Socket } from "./chatbot";
+    statusConnections.add(socket);
+
+    socket.on("disconnect", () => {
+        console.log(`❌ Disconnected: ${socket.id}`);
+        statusConnections.delete(socket);
+    });
+});
+
+app.post("/startChat", async (req, res) => {});
+
+const PORT = 3001;
+server.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+});

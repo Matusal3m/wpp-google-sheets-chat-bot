@@ -1,5 +1,4 @@
 import React from "react";
-import { socket } from "../lib/api";
 import {
   Dialog,
   DialogContent,
@@ -13,22 +12,26 @@ import { Card } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
 import { Loader2 } from "lucide-react";
 import type { BotStatus } from "./header";
+import type { Socket } from "socket.io-client";
+import type { DefaultEventsMap } from "socket.io";
 
-export function QrCodeDialog({ status }: { status: BotStatus }) {
+export function QrCodeDialog({
+  status,
+  socket,
+}: {
+  status: BotStatus;
+  socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+}) {
   const [qrCode, setQrCode] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [socketOpen, setSocketOpen] = React.useState(false);
 
-  const qr = socket.qrcode.subscribe();
-
-  qr.on("open", () => setSocketOpen(true));
-  qr.on("message", ({ data }) => {
+  socket.on("qrcode:update", data => {
     setQrCode(data);
   });
 
   const requestQrCode = () => {
     setQrCode("");
-    qr.send("");
+    socket.emit("qrcode:listen");
   };
 
   const disabled = status.isLogged || status.isLoadingQrCode;
@@ -79,9 +82,9 @@ export function QrCodeDialog({ status }: { status: BotStatus }) {
 
           <Button
             onClick={requestQrCode}
-            disabled={!socketOpen || disabled}
+            disabled={!socket || disabled}
             className={`${
-              socketOpen ? "cursor-pointer" : "cursor-not-allowed"
+              socket ? "cursor-pointer" : "cursor-not-allowed"
             } mt-4 w-3/4 text-base py-5`}>
             {status.isLoadingQrCode ? (
               <>

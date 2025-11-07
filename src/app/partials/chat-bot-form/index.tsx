@@ -7,22 +7,20 @@ import {
   CardContent,
 } from "@/app/components/ui/card";
 import { Separator } from "@/app/components/ui/separator";
-import { GeneralDataFields } from "./general-data-fields";
-import { SupervisorFields } from "./supervisor-fields";
+import { Label } from "@/app/components/ui/label";
 import { StudentsFields, type Student } from "./students-fields";
+import { Input } from "@/app/components/ui/input";
 
 export type ChatBotFormData = {
   students: Student[];
-  companyName: string;
-  area: string;
-  supervisorName: string;
-  supervisorPhone: string;
+  phone: string;
 };
 
 export function ChatBotForm() {
   const [students, setStudents] = React.useState<Student[]>([
     { name: "", enrollmentNumber: "", callNumber: "" },
   ]);
+  const [phone, setPhone] = React.useState("");
 
   const handleAddStudent = () =>
     setStudents([
@@ -41,28 +39,25 @@ export function ChatBotForm() {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = e => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-
-    const payload: ChatBotFormData = {
-      students,
-      companyName: formData.get("companyName") as string,
-      area: formData.get("area") as string,
-      supervisorName: formData.get("supervisorName") as string,
-      supervisorPhone: formData.get("supervisorPhone") as string,
+    const payload = {
+      students: students.map(s => s.name),
+      phone,
     };
 
-    // TODO: implement the logic here
+    fetch("/startChat", { method: "POST", body: JSON.stringify(payload) });
   };
 
+  const ref = React.useRef<HTMLButtonElement>(null);
+
   return (
-    <Card className="w-full md:w-[45%] border-border bg-background flex flex-col">
+    <Card className="border-border bg-background flex flex-col">
       <CardHeader className="flex items-center justify-between shrink-0">
         <CardTitle className="text-base font-semibold">
           Cadastro para Chatbot
         </CardTitle>
 
-        {/* TODO: implement the chatbot start logic */}
         <Button
+          onClick={_ => ref.current?.click()}
           type="submit"
           form="chatbot-form"
           className="h-9 px-4 text-sm rounded-md min-w-[120px]"
@@ -74,8 +69,23 @@ export function ChatBotForm() {
 
       <CardContent className="flex-1 overflow-y-auto px-4 pb-28">
         <form onSubmit={handleSubmit} className="space-y-8 py-6 min-h-full">
-          <GeneralDataFields />
-          <SupervisorFields />
+          <section className="space-y-4">
+            <h2 className="text-base font-medium text-foreground">
+              Supervisor
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="supervisorPhone">Número</Label>
+                <Input
+                  id="supervisorPhone"
+                  onChange={e => {
+                    if (e.target.value.length > 14) return;
+                    setPhone(e.target.value);
+                  }}
+                />
+              </div>
+            </div>
+          </section>
           <Separator />
           <StudentsFields
             students={students}
@@ -83,6 +93,8 @@ export function ChatBotForm() {
             onRemove={handleRemoveStudent}
             onChange={handleChangeStudent}
           />
+
+          <button className="invisible" ref={ref}></button>
         </form>
       </CardContent>
     </Card>

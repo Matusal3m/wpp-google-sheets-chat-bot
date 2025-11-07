@@ -51,30 +51,6 @@ export function StudentsFields({
                   onChange={e => onChange(index, "name", e.target.value)}
                 />
               </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor={`student-registration-${index}`}>
-                  Matrícula
-                </Label>
-                <Input
-                  id={`student-registration-${index}`}
-                  value={student.enrollmentNumber}
-                  placeholder="Ex: 20230045"
-                  onChange={e =>
-                    onChange(index, "registration", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor={`student-call-${index}`}>Nº Chamada</Label>
-                <Input
-                  id={`student-call-${index}`}
-                  value={student.callNumber}
-                  placeholder="Ex: 15"
-                  onChange={e => onChange(index, "callNumber", e.target.value)}
-                />
-              </div>
             </div>
 
             {students.length > 1 && (
